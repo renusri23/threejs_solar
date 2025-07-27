@@ -31,24 +31,24 @@ const cubeTextureLoader = new THREE.CubeTextureLoader()
 	cubeTextureLoader.setPath( '/static/cubeMap/')
 	
 
-const sunTexture = textureLoader.load('/static/2k_sun.jpg')
+const sunTexture = textureLoader.load('/static/sun.jpg')
 
-const mercuryTexture = textureLoader.load('/static/2k_mercury.jpg')
+const mercuryTexture = textureLoader.load('/static/mercury.jpg')
 
-const venusTexture = textureLoader.load('/static/2k_venus_surface.jpg')
+const venusTexture = textureLoader.load('/static/venus_surface.jpg')
 
-const earthTexture = textureLoader.load('/static/2k_earth_daymap.jpg')
+const earthTexture = textureLoader.load('/static/earth_daymap.jpg')
 
-const marsTexture = textureLoader.load('/static/2k_mars.jpg')
+const marsTexture = textureLoader.load('/static/mars.jpg')
 
-const moonTexture = textureLoader.load('/static/2k_moon.jpg')
+const moonTexture = textureLoader.load('/static/moon.jpg')
 
-const jupiterTexture = textureLoader.load('/static/2k_jupiter.jpg')
-const saturnTexture = textureLoader.load('/static/2k_saturn.jpg')
-const ringTexture = textureLoader.load('/static/2k_saturn_ring.png')
-const uranusTexture = textureLoader.load('/static/2k_uranus.jpg')
-const neptuneTexture = textureLoader.load('/static/2k_neptune.jpg')
-// const backgroundTexture = textureLoader.load('/static/2k_stars_milky_way.jpg')
+const jupiterTexture = textureLoader.load('/static/jupiter.jpg')
+const saturnTexture = textureLoader.load('/static/saturn.jpg')
+const ringTexture = textureLoader.load('/static/saturn_ring.png')
+const uranusTexture = textureLoader.load('/static/uranus.jpg')
+const neptuneTexture = textureLoader.load('/static/neptune.jpg')
+// const backgroundTexture = textureLoader.load('/static/stars_milky_way.jpg')
 
 // scene.background =backgroundTextu
 // re
@@ -339,12 +339,35 @@ let saturnRing;
 const planetMeshes = planets.map ( (planet) => {
   const planetMesh = createPlanet(planet)
   scene.add(planetMesh)
+
+  // Draw orbital path (circular line) for each planet
+const orbitSegments = 128;
+const orbitRadius = planet.distance;
+const orbitGeometry = new THREE.BufferGeometry();
+const orbitVertices = [];
+
+for (let i = 0; i <= orbitSegments; i++) {
+  const angle = (i / orbitSegments) * Math.PI * 2;
+  const x = Math.sin(angle) * orbitRadius;
+  const z = Math.cos(angle) * orbitRadius;
+  orbitVertices.push(x, 0, z);
+}
+
+orbitGeometry.setAttribute(
+  'position',
+  new THREE.Float32BufferAttribute(orbitVertices, 3)
+);
+
+const orbitMaterial = new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.2 });
+const orbitLine = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+scene.add(orbitLine);
+
 // // Add Saturn's ring if planet is Saturn
 if (planet.name === 'Saturn') {
 
- const ringGeometry = new THREE.RingGeometry(planet.radius + 0.5, planet.radius + 2.5, 64);
+ const ringGeometry = new THREE.RingGeometry(planet.radius + 0.5, planet.radius + 2.2, 64);
     const ringMaterial = new THREE.MeshBasicMaterial({
-      map:textureLoader.load('/static/2k_saturn_ring.png'),
+      map:textureLoader.load('/static/saturn_ring.png'),
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0.7
@@ -362,7 +385,6 @@ if (planet.name === 'Saturn') {
     planetMesh.add(moonMesh);
   })
   return planetMesh;
-
 })
 
 const ambientLight = new THREE.AmbientLight(
@@ -373,7 +395,7 @@ scene.add(ambientLight)
 
 const pointLight = new THREE.PointLight(
   0xffffff,
-  3000
+  2000
 )
 scene.add(pointLight)
 
@@ -448,8 +470,6 @@ const renderloop = () => {
   saturnRing.position.copy(planet.position); // ring always stays around Saturn
 }
 
-
-   
     if (planetData.moons?.length > 0) {
       planet.children.forEach((moon, moonIndex) => {
         if (!moon || !planetData.moons[moonIndex]) return;
